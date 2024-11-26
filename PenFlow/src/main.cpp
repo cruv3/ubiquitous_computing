@@ -74,7 +74,7 @@ void loop() {
     Serial.print(magData[1]); Serial.print(", ");
     Serial.println(magData[2]);
 
-    delay(1000); // Wait for 1 second
+    delay(0.1); // Wait for 1 second
 }
 
 bool initMPU(){
