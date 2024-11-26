@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h1>Real-Time MPU9250 Data</h1>
+    <div id="graph"></div>
+    <script>
+        const socket = io();
+
+        let layout = {
+            scene: {
+                xaxis: {range: [-50, 50], title: "X-Axis"},
+                yaxis: {range: [-50, 50], title: "Y-Axis"},
+                zaxis: {range: [-50, 50], title: "Z-Axis"},
+                aspectmode: "cube"
+            }
+        };
+
+        let data = [{
+            type: "scatter3d",
+            mode: "markers",
+            x: [], // x-coordinates of points
+            y: [], // y-coordinates of points
+            z: [], // z-coordinates of points
+            marker: {
+                size: 5,
+                color: [], // Array to control point opacity (fading effect)
+                opacity: 1.0
+            }
+        }];
+
+        Plotly.newPlot("graph", data, layout);
+
+        // Point history and fading configuration
+        const pointHistory = []; // Stores the full history of points
+        const fadeInterval = 1000; // Milliseconds between fade updates
+        const fadeDuration = 2000; // Total fade duration in mil
+
+        // Function to fade points
+        function fadePoints() {
+            const now = Date.now();
+            data[0].x = [];
+            data[0].y = [];
+            data[0].z = [];
+            data[0].marker.color = [];
+            data[0].marker.opacity = [];
+
+            // Filter points based on fade duration and calculate new opacity
+            pointHistory.forEach(point => {
+                const age = now - point.timestamp;
+                if (age < fadeDuration) {
+                    const opacity = 1 - age / fadeDuration; // Calculate fade-out opacity
+                    data[0].x.push(point.x);
+                    data[0].y.push(point.y);
+                    data[0].z.push(point.z);
+                    data[0].marker.color.push(`rgba(0, 0, 255, ${opacity})`); // Dynamic color opacity
+                }
+            });
+
+            // Update the graph with the remaining points
+            Plotly.update("graph", data, layout);
+
+            // Remove expired points from the history
+            while (pointHistory.length > 0 && now - pointHistory[0].timestamp > fadeDuration) {
+                pointHistory.shift();
+            }
+        }
+        setInterval(fadePoints, fadeInterval);
+
+        socket.on('gyro_data', (msg) => {
+            console.log("Gyro: ", msg);
+            const { x, y, z } = msg;
+
+            // Add new point to the history
+            pointHistory.push({
+                x: x,
+                y: y,
+                z: z,
+                timestamp: Date.now() // Timestamp for fading
+            });
+
+            // Add the new point immediately for real-time responsiveness
+            data[0].x.push(x);
+            data[0].y.push(y);
+            data[0].z.push(z);
+            data[0].marker.color.push("rgba(0, 0, 255, 1.0)"); // Full opacity for new point
+            Plotly.update("graph", data, layout);
+        });
+    </script>
+</body>
+</html>
