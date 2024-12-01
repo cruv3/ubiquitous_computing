@@ -1,120 +1,49 @@
 import serial
+import json
 import time
 
 
-class Serial_Worker():
-    def __init__(self, port, baudrate) -> None:
+class SerialWorker:
+    def __init__(self, port, baudrate=115200, timeout=2):
         self.port = port
         self.baudrate = baudrate
+        self.timeout = timeout
         self.ser = None
-        self.retry_seconds = 5
-        self.bytesize = 8
-        self.timeout = 2
-    
-    
+
     def connect_to_port(self):
         if self.ser and self.ser.is_open:
             return
-        
+
         try:
-            print(f"Trying to connect to {self.port}...")
-            self.ser = serial.Serial(port=self.port, baudrate=self.baudrate, bytesize=self.bytesize, timeout=self.timeout)
-            print(f"Connected to {self.port}")
+            self.ser = serial.Serial(
+                port=self.port,
+                baudrate=self.baudrate,
+                timeout=self.timeout
+            )
+            print(f"Connected with {self.port}")
+        except serial.SerialException as e:
+            print(f"Error while connecting: {e}")
+            self.ser = None
+            time.sleep(5)  # Erneuter Verbindungsversuch
 
-        except serial.SerialException as e:
-            print(f"Failed to connect: {e}. Retrying in {self.retry_seconds} seconds...")
-            self.ser = None
-            time.sleep(self.retry_seconds)
+    def disconnect(self):
+        if self.ser and self.ser.is_open:
+            self.ser.close()
+            print("Closed connection.")
 
-    def decode_data(self, raw_data):
-        try:
-            return raw_data.decode("utf-8").strip()
-        except UnicodeDecodeError:
-            print(f"Error decoding data: {raw_data}")
+    def get_sensor_data(self):
+        if not self.ser or not self.ser.is_open:
+            return None     
+        try: 
+            raw_data = self.ser.readline().decode('utf-8').strip()
+            if raw_data.startswith("{") and raw_data.endswith("}"):
+                try:
+                    data = json.loads(raw_data)
+                    return data  # JSON-Daten zurückgeben
+                except json.JSONDecodeError as e:
+                    print(f"JSON decode error: {raw_data}, Error: {e}")
+                    return None
+        except Exception as e:
+            print(f"Serial error: {e}")
             return None
-        
-    def is_ascii_printable(self,data):
-        return all(32 <= b <= 126 or b in (10, 13) for b in data)
 
-    def handle_serial_data(self,raw_data):
-        line = raw_data.decode('utf-8').strip()
-        if line is not None and line.startswith("Gyro:"):
-            return line
-    
-    def get_gyro_values(self):       
-        if not self.ser or not self.ser.is_open:
-            return None
-        
-        try: 
-            raw_data = self.ser.readline()
-            if self.is_ascii_printable(raw_data):
-                data = self.decode_data(raw_data)
-                if data and data.startswith("Gyro:"):
-                    try:
-                        _, x, y, z = data.split()  # Example: "Gyro: -10 15 -20"
-                        x = int(x.strip(','))
-                        y = int(y.strip(','))
-                        z = int(z.strip(','))
-                        return [x, y, z]
-                    except ValueError as e:
-                        print(f"Error parsing gyro data: {data}. Error: {e}")
-                        return None
-        except serial.SerialException as e:
-            print(f"Serial error: {e}. Closing connection...")
-            self.ser.close()
-            self.ser = None
-        except Exception as e:
-            print(f"Unexpected error: {e}")
-        return None 
-    
-    def get_accel_values(self):       
-        if not self.ser or not self.ser.is_open:
-            return None
-        
-        try: 
-            raw_data = self.ser.readline()
-            if self.is_ascii_printable(raw_data):
-                data = self.decode_data(raw_data)
-                if data and data.startswith("Accel:"):
-                    try:
-                        _, x, y, z = data.split()  # Example: "Accel: -10 15 -20"
-                        x = int(x.strip(','))
-                        y = int(y.strip(','))
-                        z = int(z.strip(','))
-                        return [x, y, z]
-                    except ValueError as e:
-                        print(f"Error parsing gyro data: {data}. Error: {e}")
-                        return None
-        except serial.SerialException as e:
-            print(f"Serial error: {e}. Closing connection...")
-            self.ser.close()
-            self.ser = None
-        except Exception as e:
-            print(f"Unexpected error: {e}")
-        return None 
-    
-    def get_magnet_values(self):       
-        if not self.ser or not self.ser.is_open:
-            return None
-        
-        try: 
-            raw_data = self.ser.readline()
-            if self.is_ascii_printable(raw_data):
-                data = self.decode_data(raw_data)
-                if data and data.startswith("Magnet:"):
-                    try:
-                        _, x, y, z = data.split()  # Example: "Magnet: -10 15 -20"
-                        x = int(x.strip(','))
-                        y = int(y.strip(','))
-                        z = int(z.strip(','))
-                        return [x, y, z]
-                    except ValueError as e:
-                        print(f"Error parsing gyro data: {data}. Error: {e}")
-                        return None
-        except serial.SerialException as e:
-            print(f"Serial error: {e}. Closing connection...")
-            self.ser.close()
-            self.ser = None
-        except Exception as e:
-            print(f"Unexpected error: {e}")
-        return None 

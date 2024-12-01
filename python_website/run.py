@@ -1,7 +1,6 @@
 from flask import Flask, render_template
 from flask_socketio import SocketIO
-from serial_worker import Serial_Worker
-from eventlet import monkey_patch
+from serial_worker import SerialWorker
 import threading
 
 app = Flask(__name__)
@@ -14,7 +13,7 @@ def index():
 PORT = "COM4"
 BAUDRATE = 115200
 
-serial_worker = Serial_Worker(port=PORT, baudrate=BAUDRATE)
+serial_worker = SerialWorker(port=PORT, baudrate=BAUDRATE)
 stop_event = threading.Event() 
 
 @socketio.on('connect')
@@ -28,34 +27,20 @@ def disconnet():
 
 def serial_start_listening():
     serial_worker.connect_to_port()
+
     while not stop_event.is_set(): 
         if serial_worker.ser and serial_worker.ser.is_open:
-            gyro_values = serial_worker.get_gyro_values()
-            if gyro_values:
-                print(f"Gyro: {gyro_values}")
-                socketio.emit('gyro_data', {
-                    'x': gyro_values[0],
-                    'y': gyro_values[1],
-                    'z': gyro_values[2]
-                })
-            accel_values = serial_worker.get_accel_values()
-            if accel_values:
-                 print(f"Accel: {accel_values}")
-                 socketio.emit('accel_data', {
-                    'x': accel_values[0],
-                    'y': accel_values[1],
-                    'z': accel_values[2]
-                })
-                 
-            magnet_values = serial_worker.get_magnet_values()
-            if magnet_values:
-                 print(f"Magnet: {magnet_values}")
-                 socketio.emit('magnet_data', {
-                    'x': magnet_values[0],
-                    'y': magnet_values[1],
-                    'z': magnet_values[2]
-                })
-        socketio.sleep(0.1) 
+            sensor_data = serial_worker.get_sensor_data()
+
+            if sensor_data:
+                accel = sensor_data.get("accel")
+                gyro = sensor_data.get("gyro")
+                mag = sensor_data.get("mag")
+                if accel and gyro and mag:
+                    print(accel)
+                    print(gyro)
+                    print(mag)
+
 
 if __name__ == '__main__':
     socketio.run(app, port=5050, debug=True)
