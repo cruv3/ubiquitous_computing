@@ -3,3 +3,5 @@ flask_socketio
 pyserial
 eventlet
 numpy
+mathlib
+scipy

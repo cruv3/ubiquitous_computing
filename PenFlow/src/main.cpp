@@ -26,6 +26,26 @@ MPU9250 mpu(intPin); // instantiate MPU9250 class
 
 bool intFlag = false;
 
+int16_t accelData[3];  // Array für Beschleunigungsdaten
+int16_t gyroData[3];   // Array für Gyroskopdaten
+int16_t magData[3];    // Array für Magnetometerdaten
+
+void readSensorData(int16_t accel[], int16_t gyro[], int16_t mag[]) {
+    mpu.readAccelData(accelData);
+    mpu.readGyroData(gyroData);
+    mpu.readMagData(magData);
+}
+
+void sendSensorData(int16_t accelData[], int16_t gyroData[], int16_t magData[]) {
+    String jsonData = "{";
+    jsonData += "\"accel\": [" + String(accelData[0]) + ", " + String(accelData[1]) + ", " + String(accelData[2]) + "], ";
+    jsonData += "\"gyro\": [" + String(gyroData[0]) + ", " + String(gyroData[1]) + ", " + String(gyroData[2]) + "], ";
+    jsonData += "\"mag\": [" + String(magData[0]) + ", " + String(magData[1]) + ", " + String(magData[2]) + "]";
+    jsonData += "}";
+
+    Serial.println(jsonData);
+}
+
 void setup() {
     Serial.begin(115200);
     Wire.begin(21, 22); // SDA = GPIO21, SCL = GPIO22 for ESP32
@@ -46,32 +66,11 @@ void setup() {
     Serial.println("Magnetometer initialized.");
 }
 
+
 void loop() {
-    // Rohdaten abrufen
-    int16_t accelData[3];
-    int16_t gyroData[3];
-    int16_t magData[3];
+    readSensorData(accelData, gyroData, magData);
+    sendSensorData(accelData, gyroData, magData);
 
-    mpu.readAccelData(accelData);
-    mpu.readGyroData(gyroData);
-    mpu.readMagData(magData);
-
-    // Daten senden
-    Serial.print("{");
-    Serial.print("\"accel\": [");
-    Serial.print(accelData[0]); Serial.print(", ");
-    Serial.print(accelData[1]); Serial.print(", ");
-    Serial.print(accelData[2]); Serial.print("], ");
-
-    Serial.print("\"gyro\": [");
-    Serial.print(gyroData[0]); Serial.print(", ");
-    Serial.print(gyroData[1]); Serial.print(", ");
-    Serial.print(gyroData[2]); Serial.print("], ");
-
-    Serial.print("\"mag\": [");
-    Serial.print(magData[0]); Serial.print(", ");
-    Serial.print(magData[1]); Serial.print(", ");
-    Serial.print(magData[2]); Serial.println("]}");
     delay(10); // 100 Hz Sampling
 }
 
