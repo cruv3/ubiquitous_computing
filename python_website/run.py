@@ -32,11 +32,11 @@ def serial_start_listening():
     serial_worker.connect_to_port()
     initialization_data = []
     is_initialized = False 
+    data_buffer = []
 
     while not stop_event.is_set(): 
         if serial_worker.ser and serial_worker.ser.is_open:
             sensor_data = serial_worker.get_sensor_data()
-
             if sensor_data:
                 accel = sensor_data.get("accel")
                 gyro = sensor_data.get("gyro")
@@ -50,18 +50,24 @@ def serial_start_listening():
                             processor.initialize(initialization_data)
                             is_initialized = True
                             print("IMU initialized!")
-                    else:
-                        position = processor.process({
-                            'gyro': np.array(gyro),
-                            'accel': np.array(accel),
-                            'mag': np.array(mag)
-                        })
-                        #print(position)
-                        socketio.emit('position_data', {
-                            'x': position[0],
-                            'y': position[1],
-                            'z': position[2]
-                        })
+                    elif is_initialized:
+                        data_buffer.append(imu_data)
+                        # Process data once the buffer has sufficient data
+                        if len(data_buffer) >= 30:  # Adjust buffer size as needed
+                            data_to_process = np.vstack(data_buffer)
+                            position = processor.process({
+                                'gyro': data_to_process[:, :3],
+                                'accel': data_to_process[:, 3:6],
+                                'mag': data_to_process[:, 6:]
+                            })
+                            data_buffer.clear()  # Clear buffer after processing
+
+                            # Emit position data
+                            socketio.emit('position_data', {
+                                'x': position[0],
+                                'y': position[1],
+                                'z': position[2]
+                            })
 
 
 if __name__ == '__main__':

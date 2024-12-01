@@ -206,7 +206,6 @@ class IMUProcessor:
             return a_nav
 
     def zupt(self, a_nav, threshold):
-
         sample_number = np.shape(a_nav)[0]
         velocities = []
         prevt = -1
@@ -264,19 +263,16 @@ class IMUProcessor:
     def process(self, imu_data):
         # IMU-Daten extrahieren
         data = np.hstack((imu_data['gyro'], imu_data['accel'], imu_data['mag'])).reshape(1, -1)
-        print(data)
-        
         # EKF Schritt
         a_nav, _, _, _ = self.attitudeTrack(data, self.init_list)
         
         # Beschleunigungsfehler entfernen
-        a_nav_filtered = self.removeAccErr(a_nav, filter=False)
-        
+        #a_nav_filtered = self.removeAccErr(a_nav, filter=False)
         # ZUPT Schritt
-        v = self.zupt(a_nav_filtered, threshold=0.2)
+        v = self.zupt(a_nav, threshold=0.2)
         
         # Position berechnen
-        p = self.positionTrack(a_nav_filtered, v)
+        p = self.positionTrack(a_nav, v)
         return p[-1]  # Gebe die letzte berechnete Position zurück
     
     def rotate(self, q):

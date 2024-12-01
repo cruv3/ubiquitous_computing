@@ -12,9 +12,9 @@
 
         let layout = {
             scene: {
-                xaxis: {range: [-50, 50], title: "X-Axis"},
-                yaxis: {range: [-50, 50], title: "Y-Axis"},
-                zaxis: {range: [-50, 50], title: "Z-Axis"},
+                xaxis: {range: [-10, 10], title: "X-Axis"},
+                yaxis: {range: [-10, 10], title: "Y-Axis"},
+                zaxis: {range: [-10, 10], title: "Z-Axis"},
                 aspectmode: "cube"
             }
         };
@@ -37,7 +37,7 @@
         // Point history and fading configuration
         const pointHistory = []; // Stores the full history of points
         const fadeInterval = 1000; // Milliseconds between fade updates
-        const fadeDuration = 2000; // Total fade duration in mil
+        const fadeDuration = 3000; // Total fade duration in mil
 
         // Function to fade points
         function fadePoints() {
