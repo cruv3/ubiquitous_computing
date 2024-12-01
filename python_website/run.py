@@ -11,7 +11,7 @@ socketio = SocketIO(app,async_mode='threading')
 def index():
     return render_template('index.html')
 
-PORT = "COM3"
+PORT = "COM4"
 BAUDRATE = 115200
 
 serial_worker = Serial_Worker(port=PORT, baudrate=BAUDRATE)
