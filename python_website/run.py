@@ -53,13 +53,14 @@ def serial_start_listening():
                     elif is_initialized:
                         data_buffer.append(imu_data)
                         # Process data once the buffer has sufficient data
-                        if len(data_buffer) >= 30:  # Adjust buffer size as needed
+                        if len(data_buffer) >= 1:  # Adjust buffer size as needed
                             data_to_process = np.vstack(data_buffer)
                             position = processor.process({
                                 'gyro': data_to_process[:, :3],
                                 'accel': data_to_process[:, 3:6],
                                 'mag': data_to_process[:, 6:]
                             })
+                            print(position)
                             data_buffer.clear()  # Clear buffer after processing
 
                             # Emit position data
