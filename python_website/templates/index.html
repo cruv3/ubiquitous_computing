@@ -12,9 +12,9 @@
 
         let layout = {
             scene: {
-                xaxis: {range: [-50, 50], title: "X-Axis"},
-                yaxis: {range: [-50, 50], title: "Y-Axis"},
-                zaxis: {range: [-50, 50], title: "Z-Axis"},
+                xaxis: {range: [-5, 5], title: "X-Axis"},
+                yaxis: {range: [-5, 5], title: "Y-Axis"},
+                zaxis: {range: [-5, 5], title: "Z-Axis"},
                 aspectmode: "cube"
             }
         };
@@ -36,8 +36,8 @@
 
         // Point history and fading configuration
         const pointHistory = []; // Stores the full history of points
-        const fadeInterval = 1000; // Milliseconds between fade updates
-        const fadeDuration = 2000; // Total fade duration in mil
+        const fadeInterval = 100; // Milliseconds between fade updates
+        const fadeDuration = 1000; // Total fade duration in mil
 
         // Function to fade points
         function fadePoints() {
@@ -70,8 +70,7 @@
         }
         setInterval(fadePoints, fadeInterval);
 
-        socket.on('gyro_data', (msg) => {
-            console.log("Gyro: ", msg);
+        socket.on('position_data', (msg) => {
             const { x, y, z } = msg;
 
             // Add new point to the history
@@ -88,47 +87,6 @@
             data[0].z.push(z);
             data[0].marker.color.push("rgba(0, 0, 255, 1.0)"); // Full opacity for new point
             Plotly.update("graph", data, layout);
-        });
-
-
-        socket.on('accel_data', (msg) => {
-            console.log("Accel: ", msg);
-            const { x, y, z } = msg;
-
-            // Add new point to the history
-            pointHistory.push({
-                x: x,
-                y: y,
-                z: z,
-                timestamp: Date.now() // Timestamp for fading
-            });
-
-           // Add the new point immediately for real-time responsiveness
-           // data[0].x.push(x);
-           // data[0].y.push(y);
-           // data[0].z.push(z);
-           // data[0].marker.color.push("rgba(0, 0, 255, 1.0)"); // Full opacity for new point
-           // Plotly.update("graph", data, layout);
-        });
-
-        socket.on('magnet_data', (msg) => {
-            console.log("Magnet: ", msg);
-            const { x, y, z } = msg;
-
-            // Add new point to the history
-            pointHistory.push({
-                x: x,
-                y: y,
-                z: z,
-                timestamp: Date.now() // Timestamp for fading
-            });
-
-           // Add the new point immediately for real-time responsiveness
-           // data[0].x.push(x);
-           // data[0].y.push(y);
-           // data[0].z.push(z);
-           // data[0].marker.color.push("rgba(0, 0, 255, 1.0)"); // Full opacity for new point
-           // Plotly.update("graph", data, layout);
         });
     </script>
 </body>

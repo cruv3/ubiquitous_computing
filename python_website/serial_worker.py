@@ -36,6 +36,7 @@ class SerialWorker:
             return None     
         try: 
             raw_data = self.ser.readline().decode('utf-8').strip()
+            time.sleep(0.01)
             if raw_data.startswith("{") and raw_data.endswith("}"):
                 try:
                     data = json.loads(raw_data)
