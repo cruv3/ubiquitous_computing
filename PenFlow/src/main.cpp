@@ -47,34 +47,32 @@ void setup() {
 }
 
 void loop() {
-    // Read Accelerometer Data
+    // Rohdaten abrufen
     int16_t accelData[3];
+    int16_t gyroData[3];
+    int16_t magData[3];
+
     mpu.readAccelData(accelData);
-    // Serial.print("Accel (X, Y, Z): ");
-    Serial.print("Accel: ");
+    mpu.readGyroData(gyroData);
+    mpu.readMagData(magData);
+
+    // Daten senden
+    Serial.print("{");
+    Serial.print("\"accel\": [");
     Serial.print(accelData[0]); Serial.print(", ");
     Serial.print(accelData[1]); Serial.print(", ");
-    Serial.println(accelData[2]);
+    Serial.print(accelData[2]); Serial.print("], ");
 
-    // Read Gyroscope Data
-    int16_t gyroData[3];
-    mpu.readGyroData(gyroData);
-    // Serial.print("Gyro (X, Y, Z): ");
-    Serial.print("Gyro: ");
+    Serial.print("\"gyro\": [");
     Serial.print(gyroData[0]); Serial.print(", ");
     Serial.print(gyroData[1]); Serial.print(", ");
-    Serial.println(gyroData[2]);
+    Serial.print(gyroData[2]); Serial.print("], ");
 
-    // Read Magnetometer Data
-    int16_t magData[3];
-    mpu.readMagData(magData);
-    // Serial.print("Magnet (X, Y, Z): ");
-    Serial.print("Magnet: ");
+    Serial.print("\"mag\": [");
     Serial.print(magData[0]); Serial.print(", ");
     Serial.print(magData[1]); Serial.print(", ");
-    Serial.println(magData[2]);
-
-    delay(100); // Wait for 1 second
+    Serial.print(magData[2]); Serial.println("]}");
+    delay(10); // 100 Hz Sampling
 }
 
 bool initMPU(){
