@@ -89,6 +89,47 @@
             data[0].marker.color.push("rgba(0, 0, 255, 1.0)"); // Full opacity for new point
             Plotly.update("graph", data, layout);
         });
+
+
+        socket.on('accel_data', (msg) => {
+            console.log("Accel: ", msg);
+            const { x, y, z } = msg;
+
+            // Add new point to the history
+            pointHistory.push({
+                x: x,
+                y: y,
+                z: z,
+                timestamp: Date.now() // Timestamp for fading
+            });
+
+           // Add the new point immediately for real-time responsiveness
+           // data[0].x.push(x);
+           // data[0].y.push(y);
+           // data[0].z.push(z);
+           // data[0].marker.color.push("rgba(0, 0, 255, 1.0)"); // Full opacity for new point
+           // Plotly.update("graph", data, layout);
+        });
+
+        socket.on('magnet_data', (msg) => {
+            console.log("Magnet: ", msg);
+            const { x, y, z } = msg;
+
+            // Add new point to the history
+            pointHistory.push({
+                x: x,
+                y: y,
+                z: z,
+                timestamp: Date.now() // Timestamp for fading
+            });
+
+           // Add the new point immediately for real-time responsiveness
+           // data[0].x.push(x);
+           // data[0].y.push(y);
+           // data[0].z.push(z);
+           // data[0].marker.color.push("rgba(0, 0, 255, 1.0)"); // Full opacity for new point
+           // Plotly.update("graph", data, layout);
+        });
     </script>
 </body>
 </html>

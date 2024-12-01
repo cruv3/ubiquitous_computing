@@ -66,3 +66,55 @@ class Serial_Worker():
         except Exception as e:
             print(f"Unexpected error: {e}")
         return None 
+    
+    def get_accel_values(self):       
+        if not self.ser or not self.ser.is_open:
+            return None
+        
+        try: 
+            raw_data = self.ser.readline()
+            if self.is_ascii_printable(raw_data):
+                data = self.decode_data(raw_data)
+                if data and data.startswith("Accel:"):
+                    try:
+                        _, x, y, z = data.split()  # Example: "Accel: -10 15 -20"
+                        x = int(x.strip(','))
+                        y = int(y.strip(','))
+                        z = int(z.strip(','))
+                        return [x, y, z]
+                    except ValueError as e:
+                        print(f"Error parsing gyro data: {data}. Error: {e}")
+                        return None
+        except serial.SerialException as e:
+            print(f"Serial error: {e}. Closing connection...")
+            self.ser.close()
+            self.ser = None
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+        return None 
+    
+    def get_magnet_values(self):       
+        if not self.ser or not self.ser.is_open:
+            return None
+        
+        try: 
+            raw_data = self.ser.readline()
+            if self.is_ascii_printable(raw_data):
+                data = self.decode_data(raw_data)
+                if data and data.startswith("Magnet:"):
+                    try:
+                        _, x, y, z = data.split()  # Example: "Magnet: -10 15 -20"
+                        x = int(x.strip(','))
+                        y = int(y.strip(','))
+                        z = int(z.strip(','))
+                        return [x, y, z]
+                    except ValueError as e:
+                        print(f"Error parsing gyro data: {data}. Error: {e}")
+                        return None
+        except serial.SerialException as e:
+            print(f"Serial error: {e}. Closing connection...")
+            self.ser.close()
+            self.ser = None
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+        return None 

@@ -11,7 +11,7 @@ socketio = SocketIO(app,async_mode='threading')
 def index():
     return render_template('index.html')
 
-PORT = "COM4"
+PORT = "COM3"
 BAUDRATE = 115200
 
 serial_worker = Serial_Worker(port=PORT, baudrate=BAUDRATE)
@@ -37,6 +37,23 @@ def serial_start_listening():
                     'x': gyro_values[0],
                     'y': gyro_values[1],
                     'z': gyro_values[2]
+                })
+            accel_values = serial_worker.get_accel_values()
+            if accel_values:
+                 print(f"Accel: {accel_values}")
+                 socketio.emit('accel_data', {
+                    'x': accel_values[0],
+                    'y': accel_values[1],
+                    'z': accel_values[2]
+                })
+                 
+            magnet_values = serial_worker.get_magnet_values()
+            if magnet_values:
+                 print(f"Magnet: {magnet_values}")
+                 socketio.emit('magnet_data', {
+                    'x': magnet_values[0],
+                    'y': magnet_values[1],
+                    'z': magnet_values[2]
                 })
         socketio.sleep(0.1) 
 
