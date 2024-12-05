@@ -33,17 +33,25 @@ class SerialWorker:
 
     def get_sensor_data(self):
         if not self.ser or not self.ser.is_open:
-            return None     
-        try: 
+            print("Serial port is not open or unavailable.")
+            return None
+
+        try:
+            # Read a line from the serial port
             raw_data = self.ser.readline().decode('utf-8').strip()
-            time.sleep(0.01)
+
+            # Debugging: Print the raw data received
+            print(f"{raw_data}")
+
+            # Process JSON data if it starts and ends with braces
             if raw_data.startswith("{") and raw_data.endswith("}"):
                 try:
                     data = json.loads(raw_data)
-                    return data  # JSON-Daten zurückgeben
+                    return data  # Return parsed JSON data
                 except json.JSONDecodeError as e:
                     print(f"JSON decode error: {raw_data}, Error: {e}")
                     return None
+                
         except Exception as e:
             print(f"Serial error: {e}")
             return None
