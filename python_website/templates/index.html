@@ -12,9 +12,9 @@
 
         let layout = {
             scene: {
-                xaxis: {range: [-150, 150], title: "X-Axis"},
-                yaxis: {range: [-150, 150], title: "Y-Axis"},
-                zaxis: {range: [-150, 150], title: "Z-Axis"},
+                xaxis: {range: [-5, 5], title: "X-Axis"},
+                yaxis: {range: [-5, 5], title: "Y-Axis"},
+                zaxis: {range: [-5, 5], title: "Z-Axis"},
                 aspectmode: "cube"
             }
         };
@@ -77,14 +77,14 @@
             pointHistory.push({
                 x: x,
                 y: y,
-                z: 0,
+                z: z,
                 timestamp: Date.now() // Timestamp for fading
             });
 
             // Add the new point immediately for real-time responsiveness
             data[0].x.push(x);
             data[0].y.push(y);
-            data[0].z.push(0);
+            data[0].z.push(z);
             data[0].marker.color.push("rgba(0, 0, 255, 1.0)"); // Full opacity for new point
             Plotly.update("graph", data, layout);
         });

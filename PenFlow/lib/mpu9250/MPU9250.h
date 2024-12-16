@@ -93,7 +93,7 @@ class MPU9250_ {
     float mag_bias_factory[3] {0., 0., 0.};
     float mag_bias[3] {0., 0., 0.};  // mag calibration value in MAG_OUTPUT_BITS: 16BITS
     float mag_scale[3] {1., 1., 1.};
-    float magnetic_declination = -7.51;  // Japan, 24th June
+    float magnetic_declination = 66.32;  // Japan, 24th June
 
     // Temperature
     int16_t temperature_count {0};  // temperature raw count output

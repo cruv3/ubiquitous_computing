@@ -28,22 +28,43 @@ def connect():
 def disconnet():
     stop_event.set()
 
+def collect_initial_data(sensor_data, num_samples=100):
+    """Collects initial data samples from the IMU for initialization."""
+    samples = []
+    while len(samples) < num_samples:
+        if sensor_data:
+            sample = np.array(sensor_data['gyro'] + sensor_data['accel'] + sensor_data['mag'])
+            samples.append(sample)
+    return np.array(samples)
+
 def serial_start_listening():
     serial_worker.connect_to_port()
 
     while not stop_event.is_set(): 
         if serial_worker.ser and serial_worker.ser.is_open:
             sensor_data = serial_worker.get_sensor_data()
-            if sensor_data:
-                yaw = sensor_data.get("yaw")
-                pitch = sensor_data.get("pitch")
-                roll = sensor_data.get("roll")
-                if yaw and pitch and roll:
+            print(sensor_data)
+            if sensor_data and all(key in sensor_data for key in ['gyro', 'accel', 'mag']):
+                
+                initial_data = collect_initial_data(sensor_data, num_samples=100)
+                processor.initialize(initial_data)
+                if sensor_data:
+                    imu_data = {
+                        'gyro': sensor_data['gyro'],
+                        'accel': sensor_data['accel'],
+                        'mag': sensor_data['mag']
+                    }
+
+                    # Process data to get position
+                    position = processor.process(imu_data)
+                    
+                    # Emit position data
                     socketio.emit('position_data', {
-                            'x': yaw,
-                            'y': pitch,
-                            'z': roll
-                         })
+                        'x': position[0],
+                        'y': position[1],
+                        'z': position[2]
+                    })
+
 
 
 if __name__ == '__main__':

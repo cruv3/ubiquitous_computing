@@ -5,7 +5,7 @@ MPU9250 mpu;
 
 void print_roll_pitch_yaw();
 void print_calibration();
-
+void print_sensor_data();
 
 void setup() {
     Serial.begin(115200);
@@ -37,13 +37,33 @@ void setup() {
 
 
 void loop() {
+    bool value = false;
+    if(!value) {
+        value = true;
+    }else{
+        return;
+    }
+
     if (mpu.update()) {
         static uint32_t prev_ms = millis();
         if (millis() > prev_ms + 25) {
-            print_roll_pitch_yaw();
+            print_sensor_data();
             prev_ms = millis();
         }
     }
+}
+
+void print_sensor_data() {
+    String jsonData = "{";
+    jsonData += "\"gyro\": [" + String(mpu.getGyroX(), 2) + ", " + String(mpu.getGyroY(), 2) + ", " + String(mpu.getGyroZ(), 2) + "], ";
+    jsonData += "\"accel\": [" + String(mpu.getAccX(), 2) + ", " + String(mpu.getAccY(), 2) + ", " + String(mpu.getAccZ(), 2) + "], ";
+    jsonData += "\"mag\": [" + String(mpu.getMagX(), 2) + ", " + String(mpu.getMagY(), 2) + ", " + String(mpu.getMagZ(), 2) + "], ";
+    jsonData += "\"yaw\": " + String(mpu.getYaw(), 2) + ", ";
+    jsonData += "\"pitch\": " + String(mpu.getPitch(), 2) + ", ";
+    jsonData += "\"roll\": " + String(mpu.getRoll(), 2);
+    jsonData += "}";
+
+    Serial.println(jsonData);  // Print JSON data
 }
 
 void print_roll_pitch_yaw() {
@@ -54,7 +74,6 @@ void print_roll_pitch_yaw() {
     jsonData += "}";
 
     Serial.println(jsonData);  // Print JSON data
-    delay(10);
 }
 
 
