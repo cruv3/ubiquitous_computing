@@ -1,0 +1,4 @@
+pygame
+pyserial
+pyopengl
+pynput
