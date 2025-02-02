@@ -3,6 +3,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 import pygame
 from pygame.locals import *
+
 import serial
 
 PORT = "COM4"
@@ -139,4 +140,5 @@ def main():
     print ("fps:  %d" % ((frames*1000)/(pygame.time.get_ticks()-ticks)))
 
     
-if __name__ == '__main__': main()
+if __name__ == '__main__': 
+    main()
